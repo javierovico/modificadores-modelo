@@ -57,11 +57,13 @@ const ModeloModificador = function(atributos,getters = {},appends = []){
 }
 
 const Punto = function(atributos){
-    return new ModeloModificador(atributos,{
+    return ModeloModificador(atributos,{
         id: (target) => target._attributes.id * 2,
         nombrePurete: (target) => target.nombre + '_ PURETE' + target.id,
     },['nombrePurete'])
 }
 
 const punto = new Punto({id:1,nombre:'caberna'});
+const punto2 = new Punto({id:2,nombre:'caberna2'});
 console.log(JSON.stringify(punto))
+console.log(JSON.stringify(punto2))
