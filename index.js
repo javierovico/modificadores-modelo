@@ -36,34 +36,17 @@ const ModeloBase = function({atributos = {}, appends = [], getters = {}}){
 }
 
 const ModeloModificador = function(atributos,getters = {},appends = []){
-    return new Proxy(new ModeloBase({atributos,getters, appends}),{
-
-    });
-    // return new Proxy(new ModeloBase(atributos,appends), {
-    //     get: function(target,name){
-    //         if(name in getters){
-    //             return getters[name](target)
-    //         }else if(name in target._updates){
-    //             return target._updates[name]
-    //         }else if(name in target._attributes){
-    //             return target._attributes[name]
-    //         }else if(name in target){
-    //             return target[name]
-    //         }else{
-    //             return 'nodef'
-    //         }
-    //     }
-    // })
+    return new ModeloBase({atributos,getters, appends})
 }
 
 const Punto = function(atributos){
-    return ModeloModificador(atributos,{
+    return new ModeloModificador(atributos,{
         id: (target) => target._attributes.id * 2,
         nombrePurete: (target) => target.nombre + '_ PURETE' + target.id,
     },['nombrePurete'])
 }
 
-const punto = new Punto({id:1,nombre:'caberna'});
-const punto2 = new Punto({id:2,nombre:'caberna2'});
-console.log(JSON.stringify(punto))
-console.log(JSON.stringify(punto2))
+const punto =Punto({id:1,nombre:'caberna'});
+console.log(JSON.stringify(punto,null,2))
+const punto2 = Punto({id:2,nombre:'caberna2'});
+console.log(JSON.stringify(punto2,null,2))
