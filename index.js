@@ -72,6 +72,7 @@ const Punto = function(atributos){
         }
     })
 }
+ModeloBase.prototype.puta = 'si'
 
 const punto = Punto({id:1,nombre:'caberna',tour:{id:1,nombre:'tour'}});
 console.log(JSON.stringify(punto,null,2))
