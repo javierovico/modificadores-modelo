@@ -1,18 +1,9 @@
-const handler = {
-    get: function (target, name) {
-        return name in target ?
-            target[name] :
-            37;
-    }
-};
-
-const ModeloBase = function({atributos = {}, appends = [], getset = {}}){
+const ModeloBase = function({atributos = {}, appends = [], metodos = {}}){
     Object.defineProperty(this,'_attributes',{value:atributos, writable:false, enumerable:false})
     Object.defineProperty(this,'_updates',{value: {}, writable:true, enumerable:false})
-    Object.defineProperties(this,Object.entries(atributos).filter(([key])=>!(key in getset)).reduce((acum,[key,value])=> Object.assign(acum,{[key]:{
+    Object.defineProperty(this,'_metodos',{value: metodos, writable:false, enumerable:false})
+    Object.defineProperties(this,Object.entries(atributos).reduce((acum,[key,value])=> Object.assign(acum,{[key]:{
         enumerable: true,
-        // writable:true,
-        // value,
         get: function(){
             if(key in this._updates){
                 return this._updates[key]
@@ -26,31 +17,44 @@ const ModeloBase = function({atributos = {}, appends = [], getset = {}}){
             this._updates[key] = nuevo
         }
     }}),{}))
-    Object.defineProperties(this,Object.entries(getset).reduce((acum,[key,value])=> Object.assign(acum,{[key]:{
-            enumerable: (0<=appends.indexOf(key)) || (key in atributos),
-            // writable:false,
-            get: function(){
-                return value(this)
-            },
-        }}),{}))
+    Object.entries(metodos).forEach(([key,value])=>{
+        const resultadoComprobacion = /^(get)(.+)(Attribute)$/.exec(key)
+        if(resultadoComprobacion){
+            const nuevoAtributo = resultadoComprobacion[2].charAt(0).toLowerCase() + resultadoComprobacion[2].slice(1)
+            Object.defineProperty(this,nuevoAtributo,{
+                enumerable: 0<=appends.indexOf(nuevoAtributo),
+                get: function(){
+                    return value(this)
+                }
+            })
+        }
+    })
 }
-
-// const ModeloModificador = function(atributos,getters = {},appends = []){
-//     return new ModeloBase({atributos,getters, appends})
-// }
-
-const Punto = function(atributos){
+const Tour = function(atributos){
     return new ModeloBase({
         atributos,
-        getset:{
+        metodos:{
             id: (target) => target._attributes.id * 2,
-            nombrePurete: (target) => target.nombre + '_ PURETE' + target.id,
+            getNombrePureteAttribute: (target) => target.nombre + '_ T' + target.id,
+            getNombrePureteOcultoAttribute: (target) => target.nombre + '_ T pero oculto' + target.id,
         },
         appends:['nombrePurete']
     })
 }
 
-const punto = new Punto({id:1,nombre:'caberna'});
+const Punto = function(atributos){
+    return new ModeloBase({
+        atributos,
+        metodos:{
+            id: (target) => target._attributes.id * 2,
+            getNombrePureteAttribute: (target) => target.nombre + '_ PURETE' + target.id,
+            getNombrePureteOcultoAttribute: (target) => target.nombre + '_ PURETE pero oculto' + target.id,
+        },
+        appends:['nombrePurete']
+    })
+}
+
+const punto = Punto({id:1,nombre:'caberna',tour:{id:1,nombre:'tour'}});
 console.log(JSON.stringify(punto,null,2))
 const punto2 = Punto({id:2,nombre:'caberna2'});
 console.log(JSON.stringify(punto2,null,2))
